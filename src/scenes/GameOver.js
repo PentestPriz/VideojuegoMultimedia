@@ -8,6 +8,11 @@ export default class GameOverScene extends Phaser.Scene {
     create() {
         // UI Scene must stop
         this.scene.stop('UI');
+        // Stop Game scene to ensure cleanup
+        this.scene.stop('Game');
+
+        // Reset Camera position just in case (though it should be 0,0 on start)
+        this.cameras.main.setScroll(0, 0);
 
         this.add.rectangle(540, 960, 1080, 1920, 0x000000, 0.8);
 

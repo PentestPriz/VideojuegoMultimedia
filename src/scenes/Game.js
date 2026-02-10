@@ -8,15 +8,34 @@ export default class GameScene extends Phaser.Scene {
     }
 
     create() {
+        // Animation config - CREATE ANIMATIONS FIRST before any entities that use them
+        if (!this.anims.exists('explode')) {
+            this.anims.create({
+                key: 'explode',
+                frames: this.anims.generateFrameNumbers('explosion'),
+                frameRate: 30, // Faster for smoother 36-frame animation
+                hideOnComplete: true
+            });
+        }
+
+        if (!this.anims.exists('player_flight')) {
+            this.anims.create({
+                key: 'player_flight',
+                frames: this.anims.generateFrameNumbers('player'),
+                frameRate: 10,
+                repeat: -1
+            });
+        }
+
         // Setup básico / Basic setup
         // Límites del mapa (Rectángulo verde) / Map limits (Green rectangle)
         this.physics.world.setBounds(0, 0, 2000, 2000);
         // Fondo / Background
-        this.add.rectangle(1000, 1000, 2000, 2000, 0x228822).setDepth(-1);
+        this.add.tileSprite(1000, 1000, 2000, 2000, 'space_bg').setDepth(-1);
         // Bordes / Borders
         this.add.rectangle(1000, 1000, 2000, 2000).setStrokeStyle(10, 0xff0000).setDepth(-1); // Marco rojo visual
 
-        // Crear jugador / Create player
+        // Crear jugador / Create player (NOW the animation exists)
         this.player = new Player(this, 1000, 1000);
 
         // Cámara sigue al jugador / Camera follows player
@@ -33,7 +52,6 @@ export default class GameScene extends Phaser.Scene {
         this.enemies = this.physics.add.group({ classType: Enemy, runChildUpdate: true });
 
         // Colisiones / Collisions
-        this.physics.add.overlap(this.player.weaponHitbox, this.enemies, this.handleWeaponHit, null, this);
         this.physics.add.overlap(this.player, this.enemies, this.handlePlayerHit, null, this);
 
         // Evento de subida de nivel / Level up event
@@ -106,14 +124,42 @@ export default class GameScene extends Phaser.Scene {
     }
 
     spawnEnemy() {
-        // Spawn simple logic: random pos around player
-        const x = this.player.x + Phaser.Math.Between(-500, 500);
-        const y = this.player.y + Phaser.Math.Between(-500, 500);
+        // Get camera bounds
+        const cam = this.cameras.main;
+        const camLeft = cam.scrollX;
+        const camRight = cam.scrollX + cam.width;
+        const camTop = cam.scrollY;
+        const camBottom = cam.scrollY + cam.height;
 
+        // Spawn margin outside camera view
+        const margin = 100;
+
+        // Randomly choose which side to spawn from (0=top, 1=right, 2=bottom, 3=left)
+        const side = Phaser.Math.Between(0, 3);
+        let x, y;
+
+        switch (side) {
+            case 0: // Top
+                x = Phaser.Math.Between(camLeft - margin, camRight + margin);
+                y = camTop - margin;
+                break;
+            case 1: // Right
+                x = camRight + margin;
+                y = Phaser.Math.Between(camTop - margin, camBottom + margin);
+                break;
+            case 2: // Bottom
+                x = Phaser.Math.Between(camLeft - margin, camRight + margin);
+                y = camBottom + margin;
+                break;
+            case 3: // Left
+                x = camLeft - margin;
+                y = Phaser.Math.Between(camTop - margin, camBottom + margin);
+                break;
+        }
+
+        // Clamp to world bounds
         const clampX = Phaser.Math.Clamp(x, 0, 2000);
         const clampY = Phaser.Math.Clamp(y, 0, 2000);
-
-        // console.log('Intentando spawnear enemigo en', clampX, clampY); // Debug
 
         let enemy = this.enemies.get(clampX, clampY);
 
@@ -138,15 +184,10 @@ export default class GameScene extends Phaser.Scene {
         }
     }
 
-    handleWeaponHit(weapon, enemy) {
-        if (enemy.active) {
-            enemy.takeDamage(this.player.damage);
-        }
-    }
+
 
     handlePlayerHit(player, enemy) {
-        player.takeDamage(10); // Daño fijo por ahora / Fixed damage for now
-        // Opcional: destruir enemigo al chocar / Optional: destroy enemy on crash
-        // enemy.takeDamage(9999);
+        // Player's takeDamage now handles invincibility
+        player.takeDamage(enemy.damage);
     }
 }
