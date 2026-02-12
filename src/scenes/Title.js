@@ -45,5 +45,6 @@ export default class TitleScene extends Phaser.Scene {
         pressStartText.on('pointerdown', () => {
             this.scene.start('Game');
         });
+
     }
 }
