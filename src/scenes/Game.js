@@ -70,7 +70,7 @@ export default class GameScene extends Phaser.Scene {
         // Música de fondo / Background music
         // Parar cualquier instancia previa para evitar apilamiento
         this.sound.removeByKey('bgm');
-        this.bgm = this.sound.add('bgm', { loop: true, volume: 0.3 });
+        this.bgm = this.sound.add('bgm', { loop: true, volume: 0.2 });
         this.bgm.play();
 
         // Wave System
