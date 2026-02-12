@@ -14,20 +14,30 @@ export default class GameOverScene extends Phaser.Scene {
         // Reset Camera position just in case (though it should be 0,0 on start)
         this.cameras.main.setScroll(0, 0);
 
-        this.add.rectangle(540, 960, 1080, 1920, 0x000000, 0.8);
+        // Background image
+        this.add.image(540, 960, 'gameover_screen').setOrigin(0.5);
 
-        this.add.text(540, 800, 'GAME OVER', {
+        // Semi-transparent overlay to make text more readable if needed
+        // this.add.rectangle(540, 960, 1080, 1920, 0x000000, 0.3);
+
+        const restartText = this.add.text(540, 1600, 'Tap to Restart', {
             fontFamily: 'Orbitron, sans-serif',
-            fontSize: '80px',
-            color: '#ff0000',
-            fontStyle: 'bold'
+            fontSize: '64px',
+            color: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 6,
+            shadow: { offsetX: 2, offsetY: 2, color: '#000', blur: 2, stroke: true, fill: true }
         }).setOrigin(0.5);
 
-        const restartText = this.add.text(540, 1000, 'Tap to Restart', {
-            fontFamily: 'Orbitron, sans-serif',
-            fontSize: '48px',
-            color: '#ffffff'
-        }).setOrigin(0.5);
+        // Flashing effect for restart text
+        this.tweens.add({
+            targets: restartText,
+            alpha: 0,
+            duration: 800,
+            ease: 'Power1',
+            yoyo: true,
+            loop: -1
+        });
 
         this.input.on('pointerdown', () => {
             this.scene.start('Game');

@@ -26,6 +26,9 @@ export default class BootScene extends Phaser.Scene {
         // Imagen de pantalla de inicio / Title screen image
         this.load.image('title_screen', 'assets/PantallaInicio.png');
 
+        // Imagen de pantalla de game over / Game over screen image
+        this.load.image('gameover_screen', 'assets/PantallaGameOver.png');
+
 
 
     }
