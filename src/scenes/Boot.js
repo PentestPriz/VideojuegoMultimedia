@@ -7,6 +7,7 @@ export default class BootScene extends Phaser.Scene {
 
     preload() {
         this.load.image('space_bg', 'assets/space_bg.png');
+        this.load.image('title_screen', 'assets/PantallaInicio.png');
 
         // Player spritesheet: 396x164. 4 frames horizontal (99x164).
         this.load.spritesheet('player', 'assets/spritesheetNave.png', { frameWidth: 99, frameHeight: 164 });
