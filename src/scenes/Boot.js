@@ -16,6 +16,14 @@ export default class BootScene extends Phaser.Scene {
 
         // Explosion: 612x612. Assuming 6x6 grid (102x102).
         this.load.spritesheet('explosion', 'assets/explosionPixelArt.png', { frameWidth: 102, frameHeight: 102 });
+
+        // Sonido de explosión / Explosion sound
+        this.load.audio('explosion_sfx', 'assets/explosion.mp3');
+
+        // Música de fondo / Background music
+        this.load.audio('bgm', 'Star Wars Main Theme (Full).mp3');
+
+
     }
 
     create() {

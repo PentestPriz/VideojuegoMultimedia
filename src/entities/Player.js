@@ -199,6 +199,8 @@ export default class Player extends Phaser.GameObjects.Sprite {
     }
 
     shootProjectileAt(target) {
+        // Sonido de disparo
+        if (this.scene.sfx) this.scene.sfx.laserShoot();
         // Create projectile
         const proj = this.createPlasmaBall(this.x, this.y);
         this.scene.physics.add.existing(proj);
@@ -260,23 +262,36 @@ export default class Player extends Phaser.GameObjects.Sprite {
         // Don't take damage if invincible
         if (this.isInvincible) return;
 
+        // Sonido de impacto
+        if (this.scene.sfx) this.scene.sfx.hit();
+
         this.hp -= amount;
 
         // Set invincible
         this.isInvincible = true;
 
+        // Kill previous blink tween to prevent stacking
+        if (this.blinkTween) {
+            this.blinkTween.stop();
+            this.setAlpha(1);
+        }
+        if (this.invincibilityTimer) {
+            this.invincibilityTimer.remove(false);
+        }
+
         // Blinking effect
-        this.scene.tweens.add({
+        this.blinkTween = this.scene.tweens.add({
             targets: this,
             alpha: 0.3,
             duration: 150,
             yoyo: true,
-            repeat: 5 // Blink 5 times over 1.5 seconds
+            repeat: 5
         });
 
         // Remove invincibility after duration
-        this.scene.time.delayedCall(this.invincibilityDuration, () => {
+        this.invincibilityTimer = this.scene.time.delayedCall(this.invincibilityDuration, () => {
             this.isInvincible = false;
+            if (this.blinkTween) this.blinkTween.stop();
             this.setAlpha(1); // Ensure fully visible
         });
 
@@ -297,6 +312,8 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.xp = 0;
         this.nextLevelXp *= 1.5;
         this.hp = this.maxHp;
+        // Sonido de subida de nivel
+        if (this.scene.sfx) this.scene.sfx.levelUp();
         this.emit('levelup');
     }
 

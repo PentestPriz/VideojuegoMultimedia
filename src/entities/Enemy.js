@@ -56,20 +56,44 @@ export default class Enemy extends Phaser.GameObjects.Sprite {
         if (this.scene.player) {
             this.scene.player.gainXp(10);
         }
+        // Incrementar contador de kills
+        if (this.scene.scene.get('Game')) {
+            const game = this.scene.scene.get('Game');
+            game.kills++;
+            // Sonido de explosión real
+            this.scene.sound.play('explosion_sfx', { volume: 0.4 });
+        }
 
-        // Explosion Effect - Static image, not animation
-        const explosion = this.scene.add.sprite(this.x, this.y, 'explosion', 0);
-        explosion.setScale(0.5); // Adjust size as needed
-
-        // Fade out and destroy
+        // Explosión vectorial / Vector explosion effect
+        // Flash central
+        const flash = this.scene.add.circle(this.x, this.y, 15, 0xffffff);
         this.scene.tweens.add({
-            targets: explosion,
+            targets: flash,
+            scale: 3,
             alpha: 0,
             duration: 300,
-            onComplete: () => {
-                explosion.destroy();
-            }
+            onComplete: () => flash.destroy()
         });
+
+        // Partículas de explosión
+        const colors = [0xff4400, 0xff8800, 0xffcc00, 0xffee44, 0xff2200];
+        for (let i = 0; i < 8; i++) {
+            const angle = (Math.PI * 2 / 8) * i + Phaser.Math.FloatBetween(-0.3, 0.3);
+            const dist = Phaser.Math.Between(60, 120);
+            const size = Phaser.Math.Between(4, 10);
+            const color = colors[Phaser.Math.Between(0, colors.length - 1)];
+            const p = this.scene.add.circle(this.x, this.y, size, color);
+            this.scene.tweens.add({
+                targets: p,
+                x: this.x + Math.cos(angle) * dist,
+                y: this.y + Math.sin(angle) * dist,
+                scale: 0,
+                alpha: 0,
+                duration: Phaser.Math.Between(300, 500),
+                ease: 'Sine.easeOut',
+                onComplete: () => p.destroy()
+            });
+        }
 
         // Desactivar en lugar de destruir para pooling / Disable instad of destroy for pooling
         this.setActive(false);

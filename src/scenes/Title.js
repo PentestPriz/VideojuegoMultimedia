@@ -8,6 +8,7 @@ export default class TitleScene extends Phaser.Scene {
     create() {
         // Texto de Título / Title Text
         this.add.text(540, 600, 'NOVA FORCE', {
+            fontFamily: 'Orbitron, sans-serif',
             fontSize: '80px',
             color: '#ffffff',
             fontStyle: 'bold'
@@ -15,6 +16,7 @@ export default class TitleScene extends Phaser.Scene {
 
         // Texto de instrucción / Instruction Text
         const startText = this.add.text(540, 1000, 'Toca para empezar', {
+            fontFamily: 'Orbitron, sans-serif',
             fontSize: '48px',
             color: '#aaaaaa'
         }).setOrigin(0.5);
