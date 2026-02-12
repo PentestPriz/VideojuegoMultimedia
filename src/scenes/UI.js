@@ -76,6 +76,77 @@ export default class UIScene extends Phaser.Scene {
 
         // ── Mini esquinas decorativas del HUD ──
         this.drawMiniCorners(g, 70, 40, 450, 130);
+
+        // ── Joystick Virtual ──
+        this.setupJoystick();
+    }
+
+    setupJoystick() {
+        this.joystickVector = { x: 0, y: 0 };
+        this.joystickActive = false;
+        this.centerX = 0;
+        this.centerY = 0;
+        this.radius = 120;
+
+        // Base del joystick (invisible al inicio)
+        this.joystickBase = this.add.graphics();
+        this.joystickBase.setDepth(100);
+        this.joystickBase.setVisible(false);
+
+        // Stick del joystick
+        this.joystickStick = this.add.graphics();
+        this.joystickStick.setDepth(101);
+        this.joystickStick.setVisible(false);
+
+        // Escuchar input en toda la pantalla
+        this.input.on('pointerdown', (pointer) => {
+            this.joystickActive = true;
+            this.centerX = pointer.x;
+            this.centerY = pointer.y;
+
+            this.joystickBase.clear();
+            this.joystickBase.lineStyle(4, 0x4fc3f7, 0.4);
+            this.joystickBase.strokeCircle(this.centerX, this.centerY, this.radius);
+            this.joystickBase.setVisible(true);
+
+            this.joystickStick.clear();
+            this.joystickStick.fillStyle(0x4fc3f7, 0.6);
+            this.joystickStick.fillCircle(this.centerX, this.centerY, 50);
+            this.joystickStick.setVisible(true);
+        });
+
+        this.input.on('pointermove', (pointer) => {
+            if (this.joystickActive) {
+                this.updateJoystick(pointer);
+            }
+        });
+
+        this.input.on('pointerup', () => {
+            this.joystickActive = false;
+            this.joystickVector = { x: 0, y: 0 };
+            this.joystickBase.setVisible(false);
+            this.joystickStick.setVisible(false);
+        });
+    }
+
+    updateJoystick(pointer) {
+        const dx = pointer.x - this.centerX;
+        const dy = pointer.y - this.centerY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        const angle = Math.atan2(dy, dx);
+        const limitedDist = Math.min(dist, this.radius);
+
+        const targetX = this.centerX + Math.cos(angle) * limitedDist;
+        const targetY = this.centerY + Math.sin(angle) * limitedDist;
+
+        this.joystickStick.clear();
+        this.joystickStick.fillStyle(0x4fc3f7, 0.8);
+        this.joystickStick.fillCircle(targetX, targetY, 50);
+
+        // Vector normalizado (0 a 1)
+        this.joystickVector.x = Math.cos(angle) * (limitedDist / this.radius);
+        this.joystickVector.y = Math.sin(angle) * (limitedDist / this.radius);
     }
 
     drawHUDFrame(g) {

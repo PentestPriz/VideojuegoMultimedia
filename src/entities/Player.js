@@ -37,42 +37,12 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.attackRadius = 350; // Range of the sector - increased for larger firing zone
         this.attackAngle = 120; // Width of the cone in degrees
 
-        // Movement vars
-        this.targetX = x;
-        this.targetY = y;
-        this.isMoving = false;
-
         // Visual for Attack Range (Cone)
         this.attackGraphics = scene.add.graphics();
         this.attackGraphics.setDepth(5); // Ensure it's above ground but below UI
-
-        // Setup input
-        this.setupInput(scene);
     }
 
-    setupInput(scene) {
-        // Simple Touch/Mouse Follow
-        // Updates target position on touch/click
-        scene.input.on('pointerdown', (pointer) => {
-            this.isMoving = true;
-            this.updateTarget(pointer);
-        });
 
-        scene.input.on('pointermove', (pointer) => {
-            if (pointer.isDown) {
-                this.updateTarget(pointer);
-            }
-        });
-
-        scene.input.on('pointerup', () => {
-            this.isMoving = false;
-        });
-    }
-
-    updateTarget(pointer) {
-        this.targetX = pointer.worldX;
-        this.targetY = pointer.worldY;
-    }
 
     update() {
         if (!this.active || this.hp <= 0) {
@@ -80,28 +50,12 @@ export default class Player extends Phaser.GameObjects.Sprite {
             return;
         }
 
-        // Movement Logic
-        if (this.isMoving) {
-            const distance = Phaser.Math.Distance.Between(this.x, this.y, this.targetX, this.targetY);
-
-            if (distance > 10) {
-                this.scene.physics.moveTo(this, this.targetX, this.targetY, this.speed);
-                // Rotate towards target (This determines attack direction too)
-                // Adjustment: Sprite might be facing UP by default. 
-                // Phaser rotation is 0 = RIGHT.
-                // If sprite is drawn facing UP, we need to add 90 degrees (PI/2).
-                // Let's assume standard right-facing or adjust.
-                // Usually space ships are drawn facing UP.
-                const angle = Phaser.Math.Angle.Between(this.x, this.y, this.targetX, this.targetY);
-                this.rotation = angle + Math.PI / 2; // Adjust for UP-facing sprite
-
-                // Simple animation frame swap if frames exist
-                // this.setFrame(1); 
-            } else {
-                this.body.setVelocity(0);
-                // Idle
-                // this.setFrame(0);
-            }
+        // Check for Joystick input
+        const uiScene = this.scene.scene.get('UI');
+        if (uiScene && uiScene.joystickVector && (uiScene.joystickVector.x !== 0 || uiScene.joystickVector.y !== 0)) {
+            this.body.setVelocity(uiScene.joystickVector.x * this.speed, uiScene.joystickVector.y * this.speed);
+            const angle = Math.atan2(uiScene.joystickVector.y, uiScene.joystickVector.x);
+            this.rotation = angle + Math.PI / 2;
         } else {
             this.body.setVelocity(0);
         }
