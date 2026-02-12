@@ -28,7 +28,7 @@ export default class GameOverScene extends Phaser.Scene {
         // Semi-transparent overlay to make text more readable if needed
         // this.add.rectangle(540, 960, 1080, 1920, 0x000000, 0.3);
 
-        const restartText = this.add.text(540, 1600, 'Tap to Restart', {
+        const restartText = this.add.text(540, 1600, 'Pulsa para volver a jugar', {
             fontFamily: 'Orbitron, sans-serif',
             fontSize: '64px',
             color: '#ffffff',
