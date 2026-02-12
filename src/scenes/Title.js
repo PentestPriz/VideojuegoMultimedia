@@ -6,33 +6,44 @@ export default class TitleScene extends Phaser.Scene {
     }
 
     create() {
-        // Texto de Título / Title Text
-        this.add.text(540, 600, 'NOVA FORCE', {
-            fontFamily: 'Orbitron, sans-serif',
-            fontSize: '80px',
-            color: '#ffffff',
-            fontStyle: 'bold'
-        }).setOrigin(0.5);
+        const { width, height } = this.scale;
 
-        // Texto de instrucción / Instruction Text
-        const startText = this.add.text(540, 1000, 'Toca para empezar', {
-            fontFamily: 'Orbitron, sans-serif',
-            fontSize: '48px',
-            color: '#aaaaaa'
-        }).setOrigin(0.5);
+        // Imagen de fondo a pantalla completa
+        const bg = this.add.image(width / 2, height / 2, 'title_screen');
+        bg.displayWidth = width;
+        bg.displayHeight = height;
 
-        // Interacción para iniciar / Interaction to start
-        this.input.on('pointerdown', () => {
+        // Interacción para iniciar
+        bg.setInteractive();
+        bg.on('pointerdown', () => {
             this.scene.start('Game');
         });
 
-        // Pequeña animación de parpadeo / Small blink animation
+        // Texto parpadeante "PRESS TO START"
+        const pressStartText = this.add.text(width / 2, height - 150, 'PRESS TO START', {
+            fontSize: '56px',
+            fontFamily: 'Courier',
+            fontWeight: 'bold',
+            color: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 6,
+            shadow: { color: '#000000', fill: true, blur: 0, offset: { x: 4, y: 4 } }
+        }).setOrigin(0.5).setDepth(10);
+
+        // Animación de parpadeo
         this.tweens.add({
-            targets: startText,
+            targets: pressStartText,
             alpha: 0,
-            duration: 800,
+            duration: 1000,
             yoyo: true,
-            repeat: -1
+            repeat: -1,
+            ease: 'Linear'
+        });
+
+        // Hacer que el texto también inicie el juego
+        pressStartText.setInteractive();
+        pressStartText.on('pointerdown', () => {
+            this.scene.start('Game');
         });
     }
 }
