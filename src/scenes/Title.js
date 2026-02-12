@@ -20,7 +20,7 @@ export default class TitleScene extends Phaser.Scene {
         });
 
         // Texto parpadeante "PRESS TO START"
-        const pressStartText = this.add.text(width / 2, height - 150, 'PRESS TO START', {
+        const pressStartText = this.add.text(width / 2, height - 150, 'Pulsa para empezar', {
             fontSize: '56px',
             fontFamily: 'Courier',
             fontWeight: 'bold',
