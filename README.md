@@ -28,66 +28,32 @@ Desarrollado con **Phaser 3** como proyecto de **Desarrollo de Aplicaciones Mult
 
 ## 🎮 Capturas de Pantalla
 
-> **📸 Instrucciones para las capturas:**
-> Crea una carpeta `screenshots/` en la raíz del proyecto y coloca las capturas con estos nombres.
-> Usa la resolución del juego o haz capturas en el navegador.
-
 ### Pantalla de Título
-<!-- 📸 CAPTURA: Espera a que aparezca el logo "NOVA FORCE" con las líneas doradas y el texto "TOCA PARA EMPEZAR" -->
-<!-- Tip: Haz la captura justo cuando el logo ya apareció y se ve el crawl text -->
-```
-screenshots/title_screen.png
-```
 <p align="center">
   <img src="screenshots/title_screen.png" alt="Pantalla de Título" width="300"/>
 </p>
 
 ### Gameplay — Combate
-<!-- 📸 CAPTURA: Durante el juego con enemigos en pantalla, disparos láser visibles y el cono de ataque amarillo -->
-<!-- Tip: Espera a tener varios enemigos cerca para que se vea la acción -->
-```
-screenshots/gameplay_combat.png
-```
 <p align="center">
   <img src="screenshots/gameplay_combat.png" alt="Combate en acción" width="300"/>
 </p>
 
 ### HUD e Interfaz
-<!-- 📸 CAPTURA: Enfócate en la parte superior del juego mostrando la barra de escudo, XP, oleada y kills -->
-<!-- Tip: Juega hasta oleada 2+ para que los contadores tengan valores interesantes -->
-```
-screenshots/hud_interface.png
-```
 <p align="center">
   <img src="screenshots/hud_interface.png" alt="Interfaz HUD" width="300"/>
 </p>
 
 ### Menú de Mejoras (Level Up)
-<!-- 📸 CAPTURA: Cuando subas de nivel, captura el menú con las 3 opciones de mejora -->
-<!-- Tip: Es la pantalla azul con los paneles holográficos "ELIGE TU PODER" -->
-```
-screenshots/level_up.png
-```
 <p align="center">
   <img src="screenshots/level_up.png" alt="Menú de Mejoras" width="300"/>
 </p>
 
 ### Menú de Pausa
-<!-- 📸 CAPTURA: Pulsa el botón ⏸ durante el juego para abrir el menú de pausa -->
-<!-- Tip: Se ve el overlay oscuro con el panel holográfico cyan -->
-```
-screenshots/pause_menu.png
-```
 <p align="center">
   <img src="screenshots/pause_menu.png" alt="Menú de Pausa" width="300"/>
 </p>
 
 ### Pantalla de Game Over
-<!-- 📸 CAPTURA: Déjate matar y espera a que aparezcan las estadísticas completas -->
-<!-- Tip: Juega varias oleadas y mata enemigos para que el informe de misión tenga datos interesantes -->
-```
-screenshots/game_over.png
-```
 <p align="center">
   <img src="screenshots/game_over.png" alt="Game Over" width="300"/>
 </p>
