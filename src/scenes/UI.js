@@ -1,125 +1,147 @@
-/**
- * ============================================================================
- * ESCENA UI (INTERFAZ DE USUARIO / HUD)
- * ============================================================================
- * 
- * Esta escena muestra la interfaz de usuario (UI) durante el juego.
- * Se ejecuta en paralelo con la escena Game y muestra información importante
- * al jugador en tiempo real.
- * 
- * HUD significa "Heads-Up Display" (Pantalla de Información Superpuesta).
- * Es la información que se muestra encima del juego, como la vida y el nivel.
- * 
- * Elementos que muestra:
- * - Barra de vida del jugador (roja)
- * - Nivel actual del jugador
- */
-
 import Phaser from 'phaser';
 
 export default class UIScene extends Phaser.Scene {
-    /**
-     * CONSTRUCTOR
-     * -----------
-     * Define el nombre de esta escena como 'UI'.
-     */
     constructor() {
         super('UI');
     }
 
-    /**
-     * CREATE (CREAR)
-     * --------------
-     * Este método se ejecuta cuando la escena UI se inicia.
-     * Aquí creamos todos los elementos visuales de la interfaz.
-     */
     create() {
-        // ====================================================================
-        // OBTENER REFERENCIA A LA ESCENA GAME
-        // ====================================================================
-        // Necesitamos acceder a la escena Game para leer los stats del jugador
-        // get('Game') nos da acceso a la escena con nombre 'Game'
         this.gameScene = this.scene.get('Game');
 
-        // ====================================================================
-        // BARRA DE VIDA - FONDO
-        // ====================================================================
-        // Creamos un rectángulo negro que servirá como fondo de la barra de vida
-        // Esto crea un borde visual para la barra roja
-        this.add.rectangle(
-            50,         // Posición X (esquina superior izquierda)
-            50,         // Posición Y (esquina superior izquierda)
-            500,        // Ancho de la barra (500 píxeles de ancho)
-            40,         // Alto de la barra (40 píxeles de alto)
-            0x000000    // Color negro
-        ).setOrigin(0, 0);  // Origen en la esquina superior izquierda
+        const g = this.add.graphics();
+        this.hudGraphics = g;
 
-        // ====================================================================
-        // BARRA DE VIDA - RELLENO
-        // ====================================================================
-        // Creamos un rectángulo rojo que representa la vida actual del jugador
-        // Este rectángulo cambiará de ancho según la vida del jugador
-        this.healthBar = this.add.rectangle(
-            50,         // Posición X (misma que el fondo)
-            50,         // Posición Y (misma que el fondo)
-            500,        // Ancho inicial (500 píxeles = vida completa)
-            40,         // Alto (mismo que el fondo)
-            0xff0000    // Color rojo
-        ).setOrigin(0, 0);  // Origen en la esquina superior izquierda
+        // ── Esquinas HUD decorativas ──
+        this.drawHUDFrame(g);
 
-        // ====================================================================
-        // TEXTO DE NIVEL
-        // ====================================================================
-        // Creamos el texto que muestra el nivel actual del jugador
-        this.levelText = this.add.text(
-            50,                     // Posición X (debajo de la barra de vida)
-            100,                    // Posición Y (debajo de la barra de vida)
-            'Level: 1',             // Texto inicial
-            {
-                fontSize: '32px',   // Tamaño de fuente
-                color: '#ffffff'    // Color blanco
-            }
-        );
+        // ── Barra de vida (Health Bar) ──
+        // Fondo
+        this.add.rectangle(80, 50, 420, 28, 0x0a1628, 0.8).setOrigin(0, 0).setStrokeStyle(2, 0x4fc3f7, 0.6);
+        // Relleno
+        this.healthBar = this.add.rectangle(82, 52, 416, 24, 0x4fc3f7).setOrigin(0, 0);
+        // Etiqueta
+        this.add.text(85, 28, 'ESCUDO', {
+            fontFamily: 'Orbitron, sans-serif',
+            fontSize: '16px',
+            color: '#4fc3f7'
+        });
+        // Texto de HP
+        this.hpText = this.add.text(300, 54, '100/100', {
+            fontFamily: 'Orbitron, sans-serif',
+            fontSize: '14px',
+            color: '#ffffff'
+        }).setOrigin(0.5, 0);
+
+        // ── Barra de XP ──
+        this.add.rectangle(80, 92, 420, 18, 0x0a1628, 0.8).setOrigin(0, 0).setStrokeStyle(2, 0xffd54f, 0.4);
+        this.xpBar = this.add.rectangle(82, 94, 416, 14, 0xffd54f).setOrigin(0, 0);
+        this.add.text(85, 76, 'FUERZA', {
+            fontFamily: 'Orbitron, sans-serif',
+            fontSize: '14px',
+            color: '#ffd54f'
+        });
+
+        // ── Nivel (Level) ──
+        this.levelText = this.add.text(80, 125, 'NIVEL 1', {
+            fontFamily: 'Orbitron, sans-serif',
+            fontSize: '28px',
+            color: '#ffe082',
+            stroke: '#ff8f00',
+            strokeThickness: 2
+        });
+
+        // ── Indicador de oleada (Wave) – esquina superior derecha ──
+        const wavePanelX = 1080 - 80;
+        this.add.rectangle(wavePanelX, 50, 220, 60, 0x0a1628, 0.8).setOrigin(1, 0).setStrokeStyle(2, 0xffd54f, 0.5);
+        const deco = this.add.graphics();
+        deco.lineStyle(2, 0xffd54f, 0.5);
+        deco.beginPath();
+        deco.moveTo(wavePanelX - 220, 50);
+        deco.lineTo(wavePanelX - 205, 65);
+        deco.strokePath();
+
+        this.waveText = this.add.text(wavePanelX - 110, 80, 'OLEADA 1', {
+            fontFamily: 'Orbitron, sans-serif',
+            fontSize: '24px',
+            color: '#ffd54f'
+        }).setOrigin(0.5);
+
+        // ── Contador de kills ──
+        this.add.rectangle(wavePanelX, 125, 220, 40, 0x0a1628, 0.8).setOrigin(1, 0).setStrokeStyle(1, 0x4fc3f7, 0.4);
+        this.killsText = this.add.text(wavePanelX - 110, 145, 'KILLS: 0', {
+            fontFamily: 'Orbitron, sans-serif',
+            fontSize: '18px',
+            color: '#4fc3f7'
+        }).setOrigin(0.5);
+
+        // ── Mini esquinas decorativas del HUD ──
+        this.drawMiniCorners(g, 70, 40, 450, 130);
     }
 
-    /**
-     * UPDATE (ACTUALIZAR)
-     * -------------------
-     * Este método se ejecuta automáticamente muchas veces por segundo (60 veces normalmente).
-     * Aquí actualizamos la UI para reflejar el estado actual del jugador.
-     * 
-     * Es importante que la UI se actualice constantemente para mostrar
-     * la vida y nivel correctos en todo momento.
-     */
+    drawHUDFrame(g) {
+        g.lineStyle(2, 0x4fc3f7, 0.3);
+        // Top-left
+        g.beginPath();
+        g.moveTo(30, 170);
+        g.lineTo(30, 30);
+        g.lineTo(550, 30);
+        g.strokePath();
+        // Top-right
+        g.beginPath();
+        g.moveTo(1050, 30);
+        g.lineTo(1050, 130);
+        g.strokePath();
+        g.beginPath();
+        g.moveTo(1050, 30);
+        g.lineTo(830, 30);
+        g.strokePath();
+    }
+
+    drawMiniCorners(g, x, y, w, h) {
+        const s = 12;
+        g.lineStyle(2, 0x4fc3f7, 0.5);
+        // TL
+        g.beginPath(); g.moveTo(x, y + s); g.lineTo(x, y); g.lineTo(x + s, y); g.strokePath();
+        // TR
+        g.beginPath(); g.moveTo(x + w - s, y); g.lineTo(x + w, y); g.lineTo(x + w, y + s); g.strokePath();
+        // BL
+        g.beginPath(); g.moveTo(x, y + h - s); g.lineTo(x, y + h); g.lineTo(x + s, y + h); g.strokePath();
+        // BR
+        g.beginPath(); g.moveTo(x + w - s, y + h); g.lineTo(x + w, y + h); g.lineTo(x + w, y + h - s); g.strokePath();
+    }
+
     update() {
-        // Obtenemos el jugador de la escena Game
         const player = this.gameScene.player;
-
-        // Verificamos que el jugador existe antes de intentar acceder a sus propiedades
-        // Esto evita errores si la escena Game aún no ha creado al jugador
         if (player) {
-            // ================================================================
-            // ACTUALIZAR BARRA DE VIDA
-            // ================================================================
-            // Calculamos el porcentaje de vida que le queda al jugador
-            // player.hp / player.maxHp nos da un valor entre 0 y 1
-            // Por ejemplo: 50 / 100 = 0.5 (50% de vida)
+            // Health bar
             const hpPercent = Phaser.Math.Clamp(player.hp / player.maxHp, 0, 1);
+            this.healthBar.width = 416 * hpPercent;
+            // Color dinámico: cyan → amarillo → rojo
+            if (hpPercent > 0.5) {
+                this.healthBar.setFillStyle(0x4fc3f7);
+            } else if (hpPercent > 0.25) {
+                this.healthBar.setFillStyle(0xffd54f);
+            } else {
+                this.healthBar.setFillStyle(0xff4444);
+            }
+            this.hpText.setText(`${Math.ceil(player.hp)}/${player.maxHp}`);
 
-            // Ajustamos el ancho de la barra roja según el porcentaje de vida
-            // 500 * hpPercent = ancho de la barra
-            // Si tiene 100% de vida: 500 * 1 = 500 píxeles (barra completa)
-            // Si tiene 50% de vida: 500 * 0.5 = 250 píxeles (media barra)
-            // Si tiene 0% de vida: 500 * 0 = 0 píxeles (barra vacía)
-            this.healthBar.width = 500 * hpPercent;
+            // XP bar
+            const xpPercent = Phaser.Math.Clamp(player.xp / player.nextLevelXp, 0, 1);
+            this.xpBar.width = 416 * xpPercent;
 
-            // ================================================================
-            // ACTUALIZAR TEXTO DE NIVEL
-            // ================================================================
-            // Actualizamos el texto para mostrar el nivel actual del jugador
-            // setText() cambia el contenido del texto
-            // 'Level: ' + player.level combina el texto con el número del nivel
-            this.levelText.setText('Level: ' + player.level);
+            // Level
+            this.levelText.setText('NIVEL ' + player.level);
+
+            // Wave
+            if (this.gameScene.wave) {
+                this.waveText.setText('OLEADA ' + this.gameScene.wave);
+            }
+
+            // Kills
+            if (this.gameScene.kills !== undefined) {
+                this.killsText.setText('KILLS: ' + this.gameScene.kills);
+            }
         }
     }
 }

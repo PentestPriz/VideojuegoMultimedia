@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import Player from '../entities/Player';
 import Enemy from '../entities/Enemy';
+import SoundFX from '../SoundFX';
 
 export default class GameScene extends Phaser.Scene {
     constructor() {
@@ -31,9 +32,14 @@ export default class GameScene extends Phaser.Scene {
         // Límites del mapa (Rectángulo verde) / Map limits (Green rectangle)
         this.physics.world.setBounds(0, 0, 2000, 2000);
         // Fondo / Background
-        this.add.tileSprite(1000, 1000, 2000, 2000, 'space_bg').setDepth(-1);
-        // Bordes / Borders
-        this.add.rectangle(1000, 1000, 2000, 2000).setStrokeStyle(10, 0xff0000).setDepth(-1); // Marco rojo visual
+        const bg = this.add.image(1000, 1000, 'space_bg').setDepth(-1);
+        bg.setDisplaySize(2000, 2000);
+        // Bordes holográficos / Holographic borders
+        const borderGfx = this.add.graphics().setDepth(-1);
+        borderGfx.lineStyle(3, 0x4fc3f7, 0.4);
+        borderGfx.strokeRect(0, 0, 2000, 2000);
+        borderGfx.lineStyle(1, 0x4fc3f7, 0.15);
+        borderGfx.strokeRect(8, 8, 1984, 1984);
 
         // Crear jugador / Create player (NOW the animation exists)
         this.player = new Player(this, 1000, 1000);
@@ -44,9 +50,6 @@ export default class GameScene extends Phaser.Scene {
 
         // Iniciar escena de UI / Start UI scene
         this.scene.launch('UI');
-
-        // Debug Text
-        this.debugText = this.add.text(10, 10, 'Debug', { fontSize: '32px', color: '#fff' }).setScrollFactor(0).setDepth(100);
 
         // Grupos de enemigos / Enemy groups
         this.enemies = this.physics.add.group({ classType: Enemy, runChildUpdate: true });
@@ -60,8 +63,19 @@ export default class GameScene extends Phaser.Scene {
             this.scene.launch('LevelUp');
         });
 
+        // Sistema de sonido / Sound system
+        this.sfx = new SoundFX();
+        this.input.once('pointerdown', () => this.sfx.init());
+
+        // Música de fondo / Background music
+        // Parar cualquier instancia previa para evitar apilamiento
+        this.sound.removeByKey('bgm');
+        this.bgm = this.sound.add('bgm', { loop: true, volume: 0.3 });
+        this.bgm.play();
+
         // Wave System
         this.wave = 1;
+        this.kills = 0;
         this.time.addEvent({
             delay: 30000, // 30 segundos por oleada / 30 seconds per wave
             callback: this.nextWave,
@@ -85,19 +99,37 @@ export default class GameScene extends Phaser.Scene {
         const newDelay = Math.max(200, 1000 - (this.wave * 100));
         this.enemySpawner.delay = newDelay;
 
-        // Notificar (Visual feedback)
-        const text = this.add.text(this.player.x, this.player.y - 100, `WAVE ${this.wave}`, {
-            fontSize: '64px',
-            color: '#ff0000',
-            fontStyle: 'bold'
-        }).setOrigin(0.5);
+        // Sonido de cazas TIE llegando
+        if (this.sfx) this.sfx.tieFlyby();
+
+        // Notificar (Visual feedback estilo Star Wars)
+        const text = this.add.text(this.player.x, this.player.y - 100, `⚔ OLEADA ${this.wave} ⚔`, {
+            fontFamily: 'Orbitron, sans-serif',
+            fontSize: '72px',
+            color: '#ffe082',
+            fontStyle: 'bold',
+            stroke: '#ff8f00',
+            strokeThickness: 4
+        }).setOrigin(0.5).setScale(0.3).setAlpha(0);
 
         this.tweens.add({
             targets: text,
-            alpha: 0,
-            y: text.y - 100,
-            duration: 2000,
-            onComplete: () => text.destroy()
+            alpha: 1,
+            scale: 1,
+            duration: 600,
+            ease: 'Back.easeOut',
+            onComplete: () => {
+                this.tweens.add({
+                    targets: text,
+                    alpha: 0,
+                    y: text.y - 80,
+                    scale: 1.3,
+                    duration: 1500,
+                    delay: 800,
+                    ease: 'Sine.easeIn',
+                    onComplete: () => text.destroy()
+                });
+            }
         });
     }
 
@@ -109,10 +141,6 @@ export default class GameScene extends Phaser.Scene {
 
     update() {
         this.player.update();
-
-        if (this.debugText) {
-            this.debugText.setText(`Enemies: ${this.enemies.countActive()}`);
-        }
 
         // Mover enemigos hacia el jugador / Move enemies towards player
         this.enemies.getChildren().forEach(enemy => {
