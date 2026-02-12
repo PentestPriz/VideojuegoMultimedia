@@ -47,6 +47,7 @@ export default class BootScene extends Phaser.Scene {
         // 'space_bg' es el nombre con el que nos referiremos a esta imagen
         // 'assets/space_bg.png' es la ruta donde está guardada la imagen
         this.load.image('space_bg', 'assets/space_bg.png');
+        this.load.image('title_screen', 'assets/PantallaInicio.png');
 
         // ====================================================================
         // CARGAR SPRITESHEET DEL JUGADOR

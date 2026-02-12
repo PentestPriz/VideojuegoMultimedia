@@ -32,40 +32,22 @@ export default class TitleScene extends Phaser.Scene {
      * Aquí creamos todos los elementos visuales y configuramos la interacción.
      */
     create() {
-        // ====================================================================
-        // TEXTO DEL TÍTULO
-        // ====================================================================
-        // Creamos el texto principal que muestra el nombre del juego
-        this.add.text(
-            540,                    // Posición X (centro horizontal de la pantalla)
-            600,                    // Posición Y (un poco arriba del centro)
-            'VAMPIRE CLONE',        // El texto a mostrar
-            {
-                fontSize: '80px',   // Tamaño de la fuente
-                color: '#ffffff',   // Color blanco
-                fontStyle: 'bold'   // Texto en negrita
-            }
-        ).setOrigin(0.5);           // Centramos el texto en su posición (0.5 = centro)
+        // Texto de Título / Title Text
+        this.add.text(540, 600, 'NOVA FORCE', {
+            fontFamily: 'Orbitron, sans-serif',
+            fontSize: '80px',
+            color: '#ffffff',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
 
-        // ====================================================================
-        // TEXTO DE INSTRUCCIÓN
-        // ====================================================================
-        // Creamos el texto que indica cómo iniciar el juego
-        const startText = this.add.text(
-            540,                    // Posición X (centro horizontal)
-            1000,                   // Posición Y (más abajo que el título)
-            'Touch to Start',       // El texto a mostrar
-            {
-                fontSize: '48px',   // Tamaño de fuente más pequeño que el título
-                color: '#aaaaaa'    // Color gris claro
-            }
-        ).setOrigin(0.5);           // Centramos el texto
+        // Texto de instrucción / Instruction Text
+        const startText = this.add.text(540, 1000, 'Toca para empezar', {
+            fontFamily: 'Orbitron, sans-serif',
+            fontSize: '48px',
+            color: '#aaaaaa'
+        }).setOrigin(0.5);
 
-        // ====================================================================
-        // CONFIGURAR INTERACCIÓN
-        // ====================================================================
-        // Detectamos cuando el usuario toca o hace clic en cualquier parte de la pantalla
-        // 'pointerdown' es el evento que se dispara al tocar/hacer clic
+        // Interacción para iniciar / Interaction to start
         this.input.on('pointerdown', () => {
             // Cuando el usuario toca, iniciamos la escena del juego
             // 'Game' es el nombre de la escena GameScene
