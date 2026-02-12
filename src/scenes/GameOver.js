@@ -14,8 +14,10 @@ export default class GameOverScene extends Phaser.Scene {
         // Reset Camera position just in case (though it should be 0,0 on start)
         this.cameras.main.setScroll(0, 0);
 
-        // Background image
-        this.add.image(540, 960, 'gameover_screen').setOrigin(0.5);
+        // Background image - set to fill the 1080x1920 screen
+        this.add.image(540, 960, 'gameover_screen')
+            .setOrigin(0.5)
+            .setDisplaySize(1080, 1920);
 
         // Semi-transparent overlay to make text more readable if needed
         // this.add.rectangle(540, 960, 1080, 1920, 0x000000, 0.3);
