@@ -200,7 +200,7 @@ export default class GameOverScene extends Phaser.Scene {
         });
 
         // Subtítulo
-        const subtitle = this.add.text(W / 2, H * 0.35, '✦  LA FUERZA THE HA ABANDONADO...  ✦', {
+        const subtitle = this.add.text(W / 2, H * 0.35, '✦  LA FUERZA TE HA ABANDONADO...  ✦', {
             fontFamily: 'Orbitron, sans-serif',
             fontSize: '24px',
             color: '#ff6b6b',
