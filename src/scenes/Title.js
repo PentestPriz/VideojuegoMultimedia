@@ -6,48 +6,33 @@ export default class TitleScene extends Phaser.Scene {
     }
 
     create() {
-        const { width, height } = this.scale;
-
-
-        const bg = this.add.image(width / 2, height / 2, 'title_screen');
-
-
-        bg.displayWidth = width;
-        bg.displayHeight = height;
-
-        // Interacción para iniciar
-        bg.setInteractive();
-        bg.on('pointerdown', () => {
-            this.scene.start('Game');
-        });
-
-        // Texto parpadeante "PRESS TO START"
-        const pressStartText = this.add.text(width / 2, height - 150, 'PRESS TO START', {
-            fontSize: '56px',
-            fontFamily: 'Courier',
-            fontWeight: 'bold',
+        // Texto de Título / Title Text
+        this.add.text(540, 600, 'NOVA FORCE', {
+            fontFamily: 'Orbitron, sans-serif',
+            fontSize: '80px',
             color: '#ffffff',
-            stroke: '#000000',
-            strokeThickness: 6,
-            shadow: { color: '#000000', fill: true, blur: 0, offset: { x: 4, y: 4 } }
-        }).setOrigin(0.5).setDepth(10); // Asegurar que esté encima de todo
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
 
-        // Animación de parpadeo
-        this.tweens.add({
-            targets: pressStartText,
-            alpha: 0,
-            duration: 1000,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Linear' // Linear es más seguro y consistente para parpadeo
+        // Texto de instrucción / Instruction Text
+        const startText = this.add.text(540, 1000, 'Toca para empezar', {
+            fontFamily: 'Orbitron, sans-serif',
+            fontSize: '48px',
+            color: '#aaaaaa'
+        }).setOrigin(0.5);
+
+        // Interacción para iniciar / Interaction to start
+        this.input.on('pointerdown', () => {
+            this.scene.start('Game');
         });
 
-        // Hacer que el texto también inicie el juego
-        pressStartText.setInteractive();
-        pressStartText.on('pointerdown', () => {
-            this.scene.start('Game');
+        // Pequeña animación de parpadeo / Small blink animation
+        this.tweens.add({
+            targets: startText,
+            alpha: 0,
+            duration: 800,
+            yoyo: true,
+            repeat: -1
         });
     }
-
-
 }
