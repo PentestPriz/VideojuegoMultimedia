@@ -1,45 +1,54 @@
 import Phaser from 'phaser';
 
+/**
+ * ESCENA DE CARGA (BootScene)
+ * ---------------------------
+ * Esta es la primera escena que se ejecuta. Su única misión es cargar
+ * todos los archivos necesarios (imágenes y sonidos) en la memoria antes
+ * de que empiece el juego, para que luego no haya cortes ni tiempos de espera.
+ */
 export default class BootScene extends Phaser.Scene {
     constructor() {
-        super('Boot'); //
+        super('Boot'); // Nombre clave de esta escena
     }
 
+    /**
+     * MÉTODO PRELOAD
+     * Aquí le decimos a Phaser qué archivos tiene que ir a buscar al disco.
+     * Phaser se encarga de descargarlos y guardarlos en la caché.
+     */
     preload() {
-        this.load.image('space_bg', 'assets/space_bg.png');
+        // Carga de imágenes estáticas
+        // load.image('nombre_clave', 'ruta/del/archivo.png');
+        this.load.image('space_bg', 'assets/space_bg.png'); // Fondo espacial
+        this.load.image('title_screen', 'assets/PantallaInicio.png'); // Imagen título
+        this.load.image('gameover_screen', 'assets/PantallaGameOver.png'); // Imagen game over
+        this.load.image('enemy', 'assets/enemy.png'); // Sprite del enemigo
 
-        // Player spritesheet: 396x164. 4 frames horizontal (99x164).
+        // Carga de HOJAS DE SPRITES (Spritesheets)
+        // Son imágenes que contienen varios "cuadros" de animación en una sola fila.
+        // frameWidth/frameHeight: Tamaño de cada cuadrito individual.
+
+        // Nave del jugador: tiene 4 cuadros de animación de 99x164 píxeles.
         this.load.spritesheet('player', 'assets/spritesheetNave.png', { frameWidth: 99, frameHeight: 164 });
-        // Old player_move is removed/replaced by this sheet.
-
-        this.load.image('enemy', 'assets/enemy.png');
-
-        // Explosion: 612x612. Assuming 6x6 grid (102x102).
-        this.load.spritesheet('explosion', 'assets/explosionPixelArt.png', { frameWidth: 102, frameHeight: 102 });
-
-        // Sonido de explosión / Explosion sound
-        this.load.audio('explosion_sfx', 'assets/explosion.mp3');
-
-        // Música de fondo / Background music
-        this.load.audio('bgm', 'Musica.mp3');
-        // this.load.audio('bgm_starwars', 'Star Wars Main Theme (Full).mp3');
-
-        // Sonido de Game Over / Game Over sound
-        this.load.audio('gameover_sfx', 'sonidoGameOver.mp3');
-
-        // Imagen de pantalla de inicio / Title screen image
-        this.load.image('title_screen', 'assets/PantallaInicio.png');
-
-        // Imagen de pantalla de game over / Game over screen image
-        this.load.image('gameover_screen', 'assets/PantallaGameOver.png');
 
 
 
+        // Carga de AUDIO
+        // load.audio('nombre_clave', 'ruta/del/archivo.mp3');
+
+        this.load.audio('explosion_sfx', 'assets/explosion.mp3'); // Sonido explosión
+        // this.load.audio('bgm', 'Musica.mp3'); // Música de fondo antigua (comentada)
+        // this.load.audio('bgm_starwars', 'Star Wars Main Theme (Full).mp3'); // Música opcional de Star Wars (descomentar si se tiene el archivo)
+        this.load.audio('gameover_sfx', 'sonidoGameOver.mp3'); // Sonido de derrota
     }
 
+    /**
+     * MÉTODO CREATE
+     * Se ejecuta automáticamente cuando todos los archivos del preload() se han cargado.
+     */
     create() {
-        // Iniciamos la pantalla de título
-        // Start title screen
+        // Una vez cargado todo, iniciamos inmediatamente la siguiente escena: 'Title'
         this.scene.start('Title');
     }
 }

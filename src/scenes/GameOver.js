@@ -1,33 +1,38 @@
 import Phaser from 'phaser';
 
+/**
+ * PANTALLA DE FIN DE JUEGO (GameOverScene)
+ * ----------------------------------------
+ * Se muestra cuando el jugador pierde toda la vida.
+ * Detiene el resto de escenas, muestra la puntuación y permite reiniciar.
+ */
 export default class GameOverScene extends Phaser.Scene {
     constructor() {
         super('GameOver');
     }
 
     create() {
-        // Stop all sounds (including background music)
+        // ── LIMPIEZA ──
+        // Detenemos todos los sonidos para que no se solapen con el sonido de derrota
         this.sound.stopAll();
 
-        // Play Game Over sound
+        // Reproducir sonido dramático de Game Over
         this.sound.play('gameover_sfx', { volume: 0.6 });
 
-        // UI Scene must stop
-        this.scene.stop('UI');
-        // Stop Game scene to ensure cleanup
-        this.scene.stop('Game');
+        // Detener las otras escenas activas
+        this.scene.stop('UI'); // La interfaz
+        this.scene.stop('Game'); // El juego (enemigos, disparos...)
 
-        // Reset Camera position just in case (though it should be 0,0 on start)
+        // Resetear la cámara (por si se quedó con zoom o desplazada)
         this.cameras.main.setScroll(0, 0);
 
-        // Background image - set to fill the 1080x1920 screen
+        // ── IMAGEN DE FONDO ──
+        // Usamos una imagen específica para el Game Over
         this.add.image(540, 960, 'gameover_screen')
             .setOrigin(0.5)
-            .setDisplaySize(1080, 1920);
+            .setDisplaySize(1080, 1920); // Asegurar que llena la pantalla
 
-        // Semi-transparent overlay to make text more readable if needed
-        // this.add.rectangle(540, 960, 1080, 1920, 0x000000, 0.3);
-
+        // ── TEXTO DE REINICIAR (Parpadeante) ──
         const restartText = this.add.text(540, 1600, 'Pulsa para volver a jugar', {
             fontFamily: 'Orbitron, sans-serif',
             fontSize: '64px',
@@ -37,7 +42,7 @@ export default class GameOverScene extends Phaser.Scene {
             shadow: { offsetX: 2, offsetY: 2, color: '#000', blur: 2, stroke: true, fill: true }
         }).setOrigin(0.5);
 
-        // Flashing effect for restart text
+        // Animación de parpadeo suave
         this.tweens.add({
             targets: restartText,
             alpha: 0,
@@ -47,8 +52,10 @@ export default class GameOverScene extends Phaser.Scene {
             loop: -1
         });
 
+        // ── REINICIO ──
+        // Al tocar cualquier parte de la pantalla, volvemos a empezar
         this.input.on('pointerdown', () => {
-            this.scene.start('Game');
+            this.scene.start('Game'); // Inicia de nuevo la escena del Juego
         });
     }
 }

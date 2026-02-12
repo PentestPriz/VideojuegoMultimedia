@@ -1,89 +1,96 @@
 import Phaser from 'phaser';
-import Player from '../entities/Player';
-import Enemy from '../entities/Enemy';
-import SoundFX from '../SoundFX';
+import Player from '../entities/Player';  // Importamos la clase del Jugador
+import Enemy from '../entities/Enemy';    // Importamos la clase del Enemigo
+import SoundFX from '../SoundFX';         // Importamos el gestor de sonidos
 
+/**
+ * ESCENA DE JUEGO (GameScene)
+ * ---------------------------
+ * Aquí ocurre toda la acción del juego.
+ * Gestiona el bucle principal, los enemigos, colisiones, puntuación y oleadas.
+ */
 export default class GameScene extends Phaser.Scene {
     constructor() {
         super('Game');
     }
 
     create() {
-        // Animation config - CREATE ANIMATIONS FIRST before any entities that use them
-        if (!this.anims.exists('explode')) {
-            this.anims.create({
-                key: 'explode',
-                frames: this.anims.generateFrameNumbers('explosion'),
-                frameRate: 30, // Faster for smoother 36-frame animation
-                hideOnComplete: true
-            });
-        }
+        // ── 1. ANIMACIONES ──
+        // Definimos las animaciones globales aquí para que cualquier entidad pueda usarlas.
 
+
+
+        // Animación de vuelo del jugador
         if (!this.anims.exists('player_flight')) {
             this.anims.create({
                 key: 'player_flight',
                 frames: this.anims.generateFrameNumbers('player'),
                 frameRate: 10,
-                repeat: -1
+                repeat: -1 // Se repite infinitamente
             });
         }
 
-        // Setup básico / Basic setup
-        // Límites del mapa (Rectángulo verde) / Map limits (Green rectangle)
+        // ── 2. EL MUNDO DE JUEGO ──
+        // Definimos los límites del mundo (2000x2000 px), más grande que la pantalla.
         this.physics.world.setBounds(0, 0, 2000, 2000);
-        // Fondo / Background
-        const bg = this.add.image(1000, 1000, 'space_bg').setDepth(-1);
-        bg.setDisplaySize(2000, 2000);
-        // Bordes holográficos / Holographic borders
-        const borderGfx = this.add.graphics().setDepth(-1);
-        borderGfx.lineStyle(3, 0x4fc3f7, 0.4);
-        borderGfx.strokeRect(0, 0, 2000, 2000);
-        borderGfx.lineStyle(1, 0x4fc3f7, 0.15);
-        borderGfx.strokeRect(8, 8, 1984, 1984);
 
-        // Crear jugador / Create player (NOW the animation exists)
+        // Fondo espacial
+        const bg = this.add.image(1000, 1000, 'space_bg').setDepth(-1);
+        bg.setDisplaySize(2000, 2000); // Estiramos el fondo para cubrir todo el mapa
+
+        // Dibujamos bordes visuales para que el jugador sepa dónde termina el mapa
+        const borderGfx = this.add.graphics().setDepth(-1);
+        borderGfx.lineStyle(3, 0x4fc3f7, 0.4); // Línea azul cyan semitransparente
+        borderGfx.strokeRect(0, 0, 2000, 2000);
+
+        // ── 3. EL JUGADOR ──
+        // Creamos la instancia del jugador en el centro del mapa.
         this.player = new Player(this, 1000, 1000);
 
-        // Cámara sigue al jugador / Camera follows player
+        // La cámara sigue al jugador para que siempre esté centrada en él.
         this.cameras.main.startFollow(this.player);
-        this.cameras.main.setBounds(0, 0, 2000, 2000);
+        this.cameras.main.setBounds(0, 0, 2000, 2000); // La cámara no puede salir del mapa
 
-        // Iniciar escena de UI / Start UI scene
+        // ── 4. INTERFAZ Y ENEMIGOS ──
+        // Lanzamos la escena UI en paralelo (se superpone a esta).
         this.scene.launch('UI');
 
-        // Grupos de enemigos / Enemy groups
+        // Grupo de enemigos: Usamos un grupo físico para gestionar colisiones y optimizar.
+        // 'runChildUpdate': hace que se ejecute el método update() de cada enemigo automáticamente.
         this.enemies = this.physics.add.group({ classType: Enemy, runChildUpdate: true });
 
-        // Colisiones / Collisions
+        // Detección de colisiones: Cuando el jugador toca un enemigo
         this.physics.add.overlap(this.player, this.enemies, this.handlePlayerHit, null, this);
 
-        // Evento de subida de nivel / Level up event
+        // Evento de subida de nivel (escuchamos al jugador)
         this.player.on('levelup', () => {
-            this.scene.pause();
-            this.scene.launch('LevelUp');
+            this.scene.pause(); // Pausamos este juego
+            this.scene.launch('LevelUp'); // Lanzamos el menú de mejoras
         });
 
-        // Sistema de sonido / Sound system
+        // ── 5. SONIDO ──
         this.sfx = new SoundFX();
+        // Web Audio requiere una interacción del usuario para iniciarse
         this.input.once('pointerdown', () => this.sfx.init());
 
-        // Música de fondo / Background music
-        // Parar cualquier instancia previa para evitar apilamiento
-        this.sound.removeByKey('bgm');
+        // Música de fondo
+        this.sound.removeByKey('bgm'); // Limpieza preventiva
         this.bgm = this.sound.add('bgm', { loop: true, volume: 0.2 });
         this.bgm.play();
 
-        // Wave System
+        // ── 6. OLEADAS Y SPAWNERS ──
         this.wave = 1;
         this.kills = 0;
+
+        // Temporizador para aumentar la dificultad (subir de oleada) cada 30 segundos
         this.time.addEvent({
-            delay: 30000, // 30 segundos por oleada / 30 seconds per wave
+            delay: 30000,
             callback: this.nextWave,
             callbackScope: this,
             loop: true
         });
 
-        // Spawner de enemigos / Enemy spawner loop
+        // Bucle infinito para generar enemigos (tiempo de spawn: 1000ms al inicio)
         this.enemySpawner = this.time.addEvent({
             delay: 1000,
             callback: this.spawnEnemy,
@@ -92,17 +99,20 @@ export default class GameScene extends Phaser.Scene {
         });
     }
 
+    /**
+     * Sube la dificultad del juego avanzando de oleada.
+     * Se ejecuta cada 30 segundos.
+     */
     nextWave() {
         this.wave++;
-        // Aumentar dificultad / Increase difficulty
-        // Reducir tiempo de spawn / Reduce spawn time
-        const newDelay = Math.max(200, 1000 - (this.wave * 100));
+
+        // Hacemos que los enemigos salgan más rápido (reducimos el tiempo de spawn)
+        const newDelay = Math.max(200, 1000 - (this.wave * 100)); // Mínimo 200ms (límite de velocidad de spawn)
         this.enemySpawner.delay = newDelay;
 
-        // Sonido de cazas TIE llegando
-        if (this.sfx) this.sfx.tieFlyby();
+        // Efecto visual de texto avisando de la nueva oleada
+        if (this.sfx) this.sfx.tieFlyby(); // Sonido TIE fighter
 
-        // Notificar (Visual feedback estilo Star Wars)
         const text = this.add.text(this.player.x, this.player.y - 100, `⚔ OLEADA ${this.wave} ⚔`, {
             fontFamily: 'Orbitron, sans-serif',
             fontSize: '72px',
@@ -112,6 +122,7 @@ export default class GameScene extends Phaser.Scene {
             strokeThickness: 4
         }).setOrigin(0.5).setScale(0.3).setAlpha(0);
 
+        // Animación de aparición y desaparición del texto
         this.tweens.add({
             targets: text,
             alpha: 1,
@@ -133,8 +144,9 @@ export default class GameScene extends Phaser.Scene {
         });
     }
 
-
-
+    /**
+     * Aplica una mejora elegida en el menú LevelUp.
+     */
     applyUpgrade(key) {
         this.player.applyUpgrade(key);
     }
@@ -142,67 +154,69 @@ export default class GameScene extends Phaser.Scene {
     update() {
         this.player.update();
 
-        // Mover enemigos hacia el jugador / Move enemies towards player
+        // Inteligencia Artificial básica de enemigos:
+        // Hacemos que todos persigan al jugador.
         this.enemies.getChildren().forEach(enemy => {
-            // Logic inside enemy class, just passing target
             if (enemy.active) {
                 enemy.setTarget(this.player);
             }
         });
     }
 
+    /**
+     * Crea un enemigo en una posición aleatoria fuera de la cámara.
+     */
     spawnEnemy() {
-        // Get camera bounds
+        // Obtenemos los límites visibles actuales de la cámara
         const cam = this.cameras.main;
         const camLeft = cam.scrollX;
         const camRight = cam.scrollX + cam.width;
         const camTop = cam.scrollY;
         const camBottom = cam.scrollY + cam.height;
 
-        // Spawn margin outside camera view
-        const margin = 100;
+        const margin = 100; // Margen extra para que nazcan bien fuera
 
-        // Randomly choose which side to spawn from (0=top, 1=right, 2=bottom, 3=left)
+        // Elegimos al azar un lado (0: Arriba, 1: Derecha, 2: Abajo, 3: Izquierda)
         const side = Phaser.Math.Between(0, 3);
         let x, y;
 
         switch (side) {
-            case 0: // Top
+            case 0: // Arriba
                 x = Phaser.Math.Between(camLeft - margin, camRight + margin);
                 y = camTop - margin;
                 break;
-            case 1: // Right
+            case 1: // Derecha
                 x = camRight + margin;
                 y = Phaser.Math.Between(camTop - margin, camBottom + margin);
                 break;
-            case 2: // Bottom
+            case 2: // Abajo
                 x = Phaser.Math.Between(camLeft - margin, camRight + margin);
                 y = camBottom + margin;
                 break;
-            case 3: // Left
+            case 3: // Izquierda
                 x = camLeft - margin;
                 y = Phaser.Math.Between(camTop - margin, camBottom + margin);
                 break;
         }
 
-        // Clamp to world bounds
+        // Aseguramos que no se salgan del mundo (0-2000)
         const clampX = Phaser.Math.Clamp(x, 0, 2000);
         const clampY = Phaser.Math.Clamp(y, 0, 2000);
 
+        // Usamos el POOLING: Intentamos reciclar un enemigo inactivo
         let enemy = this.enemies.get(clampX, clampY);
 
         if (!enemy) {
-            // Fallback si get devuelve null (no debería si es un grupo dinámico)
-            // Fallback if get returns null
+            // Si no hay disponibles para reciclar, creamos uno nuevo
             enemy = new Enemy(this, clampX, clampY);
             this.enemies.add(enemy);
         }
 
         if (enemy) {
             enemy.setActive(true).setVisible(true);
-            enemy.body.setEnable(true); // Asegurar física activada / Ensure physics enabled
+            enemy.body.setEnable(true);
 
-            // Pasar dificultad basada en oleada / Pass difficulty
+            // Aumentamos las estadísticas del enemigo según la oleada actual
             const stats = {
                 hp: 20 + (this.wave * 10),
                 speed: 100 + (this.wave * 10),
@@ -212,10 +226,10 @@ export default class GameScene extends Phaser.Scene {
         }
     }
 
-
-
+    /**
+     * Se llama cuando el jugador choca con un enemigo.
+     */
     handlePlayerHit(player, enemy) {
-        // Player's takeDamage now handles invincibility
         player.takeDamage(enemy.damage);
     }
 }
