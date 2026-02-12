@@ -24,6 +24,9 @@ export default class BootScene extends Phaser.Scene {
         this.load.audio('bgm', 'Musica.mp3');
         // this.load.audio('bgm_starwars', 'Star Wars Main Theme (Full).mp3');
 
+        // Sonido de Game Over / Game Over sound
+        this.load.audio('gameover_sfx', 'sonidoGameOver.mp3');
+
         // Imagen de pantalla de inicio / Title screen image
         this.load.image('title_screen', 'assets/PantallaInicio.png');
 

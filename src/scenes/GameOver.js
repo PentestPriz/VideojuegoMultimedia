@@ -6,6 +6,12 @@ export default class GameOverScene extends Phaser.Scene {
     }
 
     create() {
+        // Stop all sounds (including background music)
+        this.sound.stopAll();
+
+        // Play Game Over sound
+        this.sound.play('gameover_sfx', { volume: 0.6 });
+
         // UI Scene must stop
         this.scene.stop('UI');
         // Stop Game scene to ensure cleanup
