@@ -76,6 +76,28 @@ export default class UIScene extends Phaser.Scene {
 
         // ── Mini esquinas decorativas del HUD ──
         this.drawMiniCorners(g, 70, 40, 450, 130);
+
+        // ── Botón de pausa (esquina superior centro) ──
+        const pauseBtnX = 1000;
+        const pauseBtnY = 1840;
+        const pauseBg = this.add.graphics();
+        pauseBg.fillStyle(0x0a1628, 0.8);
+        pauseBg.fillRoundedRect(pauseBtnX - 40, pauseBtnY - 5, 80, 50, 8);
+        pauseBg.lineStyle(1.5, 0x4fc3f7, 0.5);
+        pauseBg.strokeRoundedRect(pauseBtnX - 40, pauseBtnY - 5, 80, 50, 8);
+
+        const pauseText = this.add.text(pauseBtnX, pauseBtnY + 20, '⏸', {
+            fontSize: '32px',
+            color: '#4fc3f7'
+        }).setOrigin(0.5);
+
+        const pauseZone = this.add.zone(pauseBtnX, pauseBtnY + 20, 80, 50)
+            .setInteractive();
+        pauseZone.on('pointerdown', () => {
+            this.scene.pause('Game');
+            this.scene.pause('UI');
+            this.scene.launch('Pause');
+        });
     }
 
     drawHUDFrame(g) {

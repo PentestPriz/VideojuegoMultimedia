@@ -296,7 +296,11 @@ export default class Player extends Phaser.GameObjects.Sprite {
         });
 
         if (this.hp <= 0) {
-            this.scene.scene.start('GameOver');
+            this.scene.scene.start('GameOver', {
+                wave: this.scene.wave || 1,
+                kills: this.scene.kills || 0,
+                level: this.level || 1
+            });
         }
     }
 

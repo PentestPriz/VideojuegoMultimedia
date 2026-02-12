@@ -21,6 +21,7 @@ import GameScene from './scenes/Game';
 import GameOverScene from './scenes/GameOver';
 import UIScene from './scenes/UI';
 import LevelUpScene from './scenes/LevelUp';
+import PauseScene from './scenes/Pause';
 
 // Configuración del juego / Game Configuration
 const config = {
@@ -38,7 +39,7 @@ const config = {
       debug: false // Ponlo en true para ver cajas de colisión / Set true to see hitboxes
     }
   },
-  scene: [BootScene, TitleScene, GameScene, UIScene, LevelUpScene, GameOverScene]
+  scene: [BootScene, TitleScene, GameScene, UIScene, LevelUpScene, GameOverScene, PauseScene]
 };
 
 // Inicializar el juego / Initialize game
